@@ -1,10 +1,13 @@
 {
-  "name": "code",
+  "name": "mystery-back",
   "version": "1.0.0",
-  "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
-    "start": "node --env-file=.env api/server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
