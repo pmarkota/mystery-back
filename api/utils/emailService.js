@@ -4,9 +4,7 @@ import Mailgun from "mailgun.js";
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
   username: "api",
-  key:
-    process.env.MAILGUN_API_KEY ||
-    "129d4b77310070b2ab4142adbdaabecb-6df690bb-f94c8e1f",
+  key: process.env.MAILGUN_API_KEY,
 });
 
 export const testEmail = async () => {
