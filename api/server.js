@@ -18,8 +18,20 @@ app.get("/", async (req, res) => {
 app.use("/auth", authenticationRouter);
 app.use("/user-management", userManagementRouter);
 app.use("/box-selection", boxSelectionRouter);
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: "Not Found",
+    message: "The requested resource does not exist" 
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: "Internal Server Error",
+    message: "Something went wrong!" 
+  });
 });
 
 export default app;
