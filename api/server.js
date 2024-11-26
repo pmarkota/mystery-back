@@ -11,9 +11,9 @@ const app = express();
 const corsOptions = {
   origin: [
     'https://mystery-box-xi.vercel.app',
-    'http://mystery-box-xi.vercel.app',
-    'http://localhost:3000',  // for local development
-    'http://localhost:5173'   // for Vite's default port
+    ...(process.env.NODE_ENV !== 'production' 
+      ? ['http://localhost:3000', 'http://localhost:5173'] 
+      : [])
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
