@@ -12,17 +12,17 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", async (req, res) => {
-  res.send("Hello World");
+  res.json({ status: "ok", message: "API is running" });
 });
 
-app.use("/auth", authenticationRouter);
-app.use("/user-management", userManagementRouter);
-app.use("/box-selection", boxSelectionRouter);
+app.use("/api/auth", authenticationRouter);
+app.use("/api/user-management", userManagementRouter);
+app.use("/api/box-selection", boxSelectionRouter);
 
 app.use((req, res) => {
   res.status(404).json({ 
     error: "Not Found",
-    message: "The requested resource does not exist" 
+    message: `Cannot ${req.method} ${req.url}` 
   });
 });
 
@@ -33,5 +33,12 @@ app.use((err, req, res, next) => {
     message: "Something went wrong!" 
   });
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
 
 export default app;
