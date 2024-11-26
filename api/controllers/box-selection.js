@@ -73,12 +73,12 @@ export const submitSelectedBoxes = async (req, res) => {
   }
 
   // Send confirmation email with detailed information
-  await sendConfirmationEmail("petar.markota@gmail.com", {
-    username: user.username,
-    remainingCredits: newCredits,
-    selectedBoxes: selectedBoxes,
-    totalBoxesSelected: boxIds.length,
-  });
+  //await sendConfirmationEmail("petar.markota@gmail.com", {
+  //username: user.username,
+  //remainingCredits: newCredits,
+  //selectedBoxes: selectedBoxes,
+  // totalBoxesSelected: boxIds.length,
+  // });
 
   res.json({
     message: "Selected boxes submitted successfully!",
