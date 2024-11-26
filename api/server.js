@@ -7,9 +7,26 @@ import boxSelectionRouter from "./routes/box-selection.js";
 
 const app = express();
 
+// Configure CORS with specific options
+const corsOptions = {
+  origin: [
+    'https://mystery-box-xi.vercel.app',
+    'http://mystery-box-xi.vercel.app',
+    'http://localhost:3000',  // for local development
+    'http://localhost:5173'   // for Vite's default port
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 app.use(logger);
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Add OPTIONS handling for preflight requests
+app.options('*', cors(corsOptions));
 
 app.get("/", async (req, res) => {
   res.json({ status: "ok", message: "API is running" });
