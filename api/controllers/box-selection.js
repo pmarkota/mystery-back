@@ -155,3 +155,93 @@ export const getBoxColor = async (req, res) => {
     color: data?.setting_value || "green", // default to green if not set
   });
 };
+
+export const getLoginPageText = async (req, res) => {
+  const { data, error } = await supabase
+    .from("global_settings")
+    .select("setting_name, setting_value")
+    .in("setting_name", [
+      "login_welcome_text",
+      "login_username_label",
+      "login_password_label",
+      "login_button_text",
+    ]);
+
+  if (error) {
+    return res.status(500).json({ error: "Error fetching login page text." });
+  }
+
+  // Convert array to object for easier frontend consumption
+  const textSettings = data.reduce((acc, item) => {
+    acc[item.setting_name] = item.setting_value;
+    return acc;
+  }, {});
+
+  res.json({
+    message: "Login page text fetched successfully!",
+    data: textSettings,
+  });
+};
+
+export const updateLoginPageText = async (req, res) => {
+  const { settings } = req.body;
+
+  // Validate input
+  const validSettings = [
+    "login_welcome_text",
+    "login_username_label",
+    "login_password_label",
+    "login_button_text",
+  ];
+
+  const updates = Object.entries(settings).filter(([key]) =>
+    validSettings.includes(key)
+  );
+
+  if (updates.length === 0) {
+    return res.status(400).json({
+      error: "No valid settings provided.",
+    });
+  }
+
+  // Update each setting
+  const promises = updates.map(([setting_name, setting_value]) =>
+    supabase.from("global_settings").upsert(
+      {
+        setting_name,
+        setting_value,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "setting_name",
+      }
+    )
+  );
+
+  try {
+    await Promise.all(promises);
+
+    // Fetch updated settings
+    const { data, error } = await supabase
+      .from("global_settings")
+      .select("setting_name, setting_value")
+      .in("setting_name", validSettings);
+
+    if (error) throw error;
+
+    const textSettings = data.reduce((acc, item) => {
+      acc[item.setting_name] = item.setting_value;
+      return acc;
+    }, {});
+
+    res.json({
+      message: "Login page text updated successfully!",
+      data: textSettings,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Error updating login page text.",
+    });
+  }
+};

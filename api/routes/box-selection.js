@@ -5,6 +5,8 @@ import {
   setAllBoxesToUnselected,
   setBoxColor,
   getBoxColor,
+  getLoginPageText,
+  updateLoginPageText,
 } from "../controllers/box-selection.js";
 import express from "express";
 import { testEmail } from "../utils/emailService.js";
@@ -25,5 +27,7 @@ router.get("/test-email", async (req, res) => {
     res.status(500).json({ error: "Failed to send test email" });
   }
 });
+router.get("/login-text", getLoginPageText);
+router.put("/admin/login-text", updateLoginPageText);
 
 export default router;
