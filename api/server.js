@@ -13,6 +13,7 @@ const corsOptions = {
     "https://mystery-box-drab.vercel.app",
     "http://localhost:3000",
     "http://localhost:5173",
+    "https://cny.kakikaki.shop",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
