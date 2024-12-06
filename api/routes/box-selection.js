@@ -10,8 +10,16 @@ import {
 } from "../controllers/box-selection.js";
 import express from "express";
 import { testEmail } from "../utils/emailService.js";
+import cors from "cors";
 
 const router = express.Router();
+
+const corsOptions = {
+  origin: "https://cny.kakikaki.shop",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
+
+router.use(cors(corsOptions));
 
 router.get("/boxes", getBoxes);
 router.get("/box", getBox);
