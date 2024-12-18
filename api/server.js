@@ -15,14 +15,32 @@ const corsOptions = {
     "http://localhost:5173",
     "https://cny.kakikaki.shop",
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-CSRF-Token",
+    "X-Requested-With",
+    "Accept",
+    "Accept-Version",
+    "Content-Length",
+    "Content-MD5",
+    "Date",
+    "X-Api-Version",
+  ],
+  exposedHeaders: [
+    "Content-Length",
+    "X-RateLimit-Limit",
+    "X-RateLimit-Remaining",
+  ],
   credentials: true,
   optionsSuccessStatus: 200,
+  maxAge: 86400, // 24 hours
 };
 
-app.use(logger);
+// Apply CORS middleware before other middleware
 app.use(cors(corsOptions));
+app.use(logger);
 app.use(express.json());
 
 // Add OPTIONS handling for preflight requests
