@@ -55,23 +55,49 @@ const corsOptions = {
   maxAge: 86400, // 24 hours
 };
 
-// Logging middleware for all requests
+// First apply express.json() for body parsing
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      try {
+        JSON.parse(buf);
+      } catch (e) {
+        console.error("Invalid JSON body:", e.message);
+        res.status(400).json({ error: "Invalid JSON" });
+        throw new Error("Invalid JSON");
+      }
+    },
+  })
+);
+
+// Then apply CORS
+app.use(cors(corsOptions));
+
+// Then apply logging middleware
 app.use((req, res, next) => {
   console.log("--------------------");
   console.log("New Request:");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
   console.log("Headers:", JSON.stringify(req.headers, null, 2));
-  console.log("Body:", JSON.stringify(req.body, null, 2));
+
+  // Log the raw body
+  if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH") {
+    console.log("Raw Body:", req.body);
+    // Also log the stringified version to check for circular references
+    try {
+      console.log("Stringified Body:", JSON.stringify(req.body));
+    } catch (e) {
+      console.log("Could not stringify body:", e.message);
+    }
+  }
+
   console.log("Origin:", req.headers.origin);
   console.log("--------------------");
   next();
 });
 
-// Apply CORS middleware before other middleware
-app.use(cors(corsOptions));
 app.use(logger);
-app.use(express.json());
 
 // Add OPTIONS handling for preflight requests
 app.options("*", cors(corsOptions));
@@ -80,9 +106,17 @@ app.get("/", async (req, res) => {
   res.json({ status: "ok", message: "API is running" });
 });
 
-app.use("/api/auth", authenticationRouter);
-app.use("/api/user-management", userManagementRouter);
-app.use("/api/box-selection", boxSelectionRouter);
+// Add error handling for routes
+const wrapAsync = (fn) => {
+  return function (req, res, next) {
+    fn(req, res, next).catch(next);
+  };
+};
+
+// Apply routes with error handling
+app.use("/api/auth", wrapAsync(authenticationRouter));
+app.use("/api/user-management", wrapAsync(userManagementRouter));
+app.use("/api/box-selection", wrapAsync(boxSelectionRouter));
 
 // 404 handler
 app.use((req, res) => {
@@ -99,6 +133,7 @@ app.use((err, req, res, next) => {
   console.error("URL:", req.url);
   console.error("Method:", req.method);
   console.error("Headers:", req.headers);
+  console.error("Body:", req.body);
   console.error("Error:", err);
   console.error("Stack:", err.stack);
 
@@ -109,6 +144,14 @@ app.use((err, req, res, next) => {
       error: "CORS Error",
       message: "Origin not allowed",
       origin: req.headers.origin,
+    });
+  }
+
+  // If it's a body parsing error
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).json({
+      error: "Invalid JSON",
+      message: "The request body contains invalid JSON",
     });
   }
 
