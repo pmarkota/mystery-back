@@ -9,13 +9,18 @@ import {
 
 const router = express.Router();
 
+// Wrap async route handlers
+const asyncHandler = (fn) => (req, res, next) => {
+  return Promise.resolve(fn(req, res, next)).catch(next);
+};
+
 // Login endpoint for users
-router.post("/user/login", loginUser);
+router.post("/user/login", asyncHandler(loginUser));
 
 // Admin login endpoint
-router.post("/admin/login", loginAdmin);
+router.post("/admin/login", asyncHandler(loginAdmin));
 
 // Create admin endpoint
-router.post("/admin/create", createAdmin);
+router.post("/admin/create", asyncHandler(createAdmin));
 
 export default router;

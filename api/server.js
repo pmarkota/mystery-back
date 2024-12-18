@@ -56,23 +56,11 @@ const corsOptions = {
   preflightContinue: false,
 };
 
-// First apply express.json() for body parsing
-app.use(
-  express.json({
-    verify: (req, res, buf) => {
-      try {
-        JSON.parse(buf);
-      } catch (e) {
-        console.error("Invalid JSON body:", e.message);
-        res.status(400).json({ error: "Invalid JSON" });
-        throw new Error("Invalid JSON");
-      }
-    },
-  })
-);
-
-// Then apply CORS
+// First apply CORS
 app.use(cors(corsOptions));
+
+// Then apply express.json() for body parsing
+app.use(express.json());
 
 // Then apply logging middleware
 app.use((req, res, next) => {
@@ -114,17 +102,10 @@ app.get("/", async (req, res) => {
   res.json({ status: "ok", message: "API is running" });
 });
 
-// Add error handling for routes
-const wrapAsync = (fn) => {
-  return function (req, res, next) {
-    fn(req, res, next).catch(next);
-  };
-};
-
-// Apply routes with error handling
-app.use("/api/auth", wrapAsync(authenticationRouter));
-app.use("/api/user-management", wrapAsync(userManagementRouter));
-app.use("/api/box-selection", wrapAsync(boxSelectionRouter));
+// Apply routes
+app.use("/api/auth", authenticationRouter);
+app.use("/api/user-management", userManagementRouter);
+app.use("/api/box-selection", boxSelectionRouter);
 
 // 404 handler
 app.use((req, res) => {
