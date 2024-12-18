@@ -24,7 +24,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
       console.log("Origin allowed:", origin);
       callback(null, true);
     } else {
@@ -53,6 +53,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   maxAge: 86400, // 24 hours
+  preflightContinue: false,
 };
 
 // First apply express.json() for body parsing
@@ -84,7 +85,6 @@ app.use((req, res, next) => {
   // Log the raw body
   if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH") {
     console.log("Raw Body:", req.body);
-    // Also log the stringified version to check for circular references
     try {
       console.log("Stringified Body:", JSON.stringify(req.body));
     } catch (e) {
@@ -94,6 +94,14 @@ app.use((req, res, next) => {
 
   console.log("Origin:", req.headers.origin);
   console.log("--------------------");
+
+  // Add response logging
+  const oldJson = res.json;
+  res.json = function (data) {
+    console.log("Response:", JSON.stringify(data, null, 2));
+    return oldJson.apply(res, arguments);
+  };
+
   next();
 });
 
@@ -152,6 +160,15 @@ app.use((err, req, res, next) => {
     return res.status(400).json({
       error: "Invalid JSON",
       message: "The request body contains invalid JSON",
+    });
+  }
+
+  // Check for Supabase errors
+  if (err.message && err.message.includes("supabase")) {
+    console.error("Supabase Error:", err);
+    return res.status(500).json({
+      error: "Database Error",
+      message: "Error connecting to the database",
     });
   }
 
